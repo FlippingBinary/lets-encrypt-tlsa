@@ -1,0 +1,77 @@
+#!/bin/bash
+##
+## le-generate
+##
+## This script generates a new keypair and certificate signing request
+## for Let's Encrypt.
+##
+## Source: https://flippingbinary.com
+## 
+## Copyright 2017 Jonathan Musselwhite
+## 
+## Permission is hereby granted, free of charge, to any person obtaining a copy 
+## of this software and associated documentation files (the "Software"), to 
+## deal in the Software without restriction, including without limitation the 
+## rights to use, copy, modify, merge, publish, distribute, sublicense, and/or 
+## sell copies of the Software, and to permit persons to whom the Software is 
+## furnished to do so, subject to the following conditions:
+## 
+## The above copyright notice and this permission notice shall be included in 
+## all copies or substantial portions of the Software.
+## 
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+## IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+## FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+## AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+## LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+## OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+## THE SOFTWARE.
+##
+###
+
+###### CHECK SETTINGS ######
+MAIN_DIR=/etc/ssl/letsencrypt
+###### CHECK SETTINGS ######
+
+if [ "$#" -lt 1 ]
+then
+  echo "Usage: $0 domain [space-separated list of alternate domains]" >&2
+  exit 1
+fi
+
+DATE=$(date +%Y%m%d%H%M%S)
+DOMAINS="DNS:$1"
+COMMON_NAME="$1"
+CSR_DIR=${MAIN_DIR}/csr/${COMMON_NAME}
+PRIVKEY_DIR=${MAIN_DIR}/keys/${COMMON_NAME}
+CNF_PATH="${MAIN_DIR}/openssl.cnf"
+CSR_PATH="${CSR_DIR}/csr-${DATE}.der"
+PRIVKEY_PATH="${PRIVKEY_DIR}/privkey-${DATE}.pem"
+
+# Build the list of alternate domain names
+shift
+for x in "$@"
+do
+  DOMAINS="$DOMAINS,DNS:$x"
+done
+
+# OpenSSL needs a configuration file, which must exist.
+if [ ! -f "${CNF_PATH}" ]
+then
+  echo "${CNF_PATH} does not exist!"
+  exit 1
+fi
+
+# Create a few directories to prevent simple errors
+mkdir -p ${CSR_DIR}
+mkdir -p ${PRIVKEY_DIR}
+chmod 700 ${PRIVKEY_DIR}
+
+# Generate the actual keypair using OpenSSL
+COMMON_NAME="${COMMON_NAME}" SAN="${DOMAINS}" openssl req \
+  -config "${CNF_PATH}" \
+  -new -nodes -subj '/' -reqexts san \
+  -out "${CSR_PATH}" \
+  -keyout "${PRIVKEY_PATH}" \
+  -newkey rsa:4096 \
+  -outform DER

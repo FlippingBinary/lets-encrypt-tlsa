@@ -1,0 +1,103 @@
+#!/bin/bash
+##
+## le-request
+##
+## This script requests a signature from Let's Encrypt CA with a reusable
+## keypair, overriding the default behavior of certbot.
+##
+## Source: https://flippingbinary.com
+## 
+## Copyright 2017 Jonathan Musselwhite
+## 
+## Permission is hereby granted, free of charge, to any person obtaining a copy 
+## of this software and associated documentation files (the "Software"), to 
+## deal in the Software without restriction, including without limitation the 
+## rights to use, copy, modify, merge, publish, distribute, sublicense, and/or 
+## sell copies of the Software, and to permit persons to whom the Software is 
+## furnished to do so, subject to the following conditions:
+## 
+## The above copyright notice and this permission notice shall be included in 
+## all copies or substantial portions of the Software.
+## 
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+## IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+## FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+## AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+## LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+## OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+## THE SOFTWARE.
+##
+###
+
+###### CHECK SETTINGS ######
+EMAIL=UnconfiguredScript@example.com
+MAIN_DIR=/etc/ssl/letsencrypt
+LOG_DIR=/var/log/letsencrypt
+###### CHECK SETTINGS ######
+
+if [ "$#" -lt 1 ]
+then
+  echo "Usage: $0 domain" >&2
+  echo "       domain MUST be the first listed domain" >&2
+  echo "       additional arguments (such as alternate domains) are ignored" >&2
+  exit 1
+fi
+
+# Set some environment variables to clean things up a little down below
+DATE=$(date +%Y%m%d%H%M%S)
+COMMON_NAME="$1"
+LOG_PATH=${LOG_DIR}/${COMMON_NAME}.log
+ARCHIVE_DIR=${MAIN_DIR}/archive/${COMMON_NAME}
+CSR_DIR=${MAIN_DIR}/csr/${COMMON_NAME}
+CERT_PATH="${ARCHIVE_DIR}/cert-${DATE}.pem"
+FULLCHAIN_PATH="${ARCHIVE_DIR}/fullchain-${DATE}.pem"
+CHAIN_PATH="${ARCHIVE_DIR}/chain-${DATE}.pem"
+
+# Locate the latest certificate signing request
+unset -v latest
+for file in "${CSR_DIR}"/csr-*.der; do
+  [[ $file -nt $latest ]] && latest=$file
+done
+
+if [ ! -f "${latest}" ]
+then
+  echo "Error: Couldn't find a certificate signing request!" >&2
+  echo "       Cannot request certificate!" >&2
+  exit 1
+fi
+
+# Make sure the directory exists to prevent simple problems
+mkdir -p ${ARCHIVE_DIR}
+
+# Finally request the actual signed certificate
+certbot certonly \
+  -n \
+  --agree-tos \
+  -m ${EMAIL} \
+  --webroot \
+  --csr ${latest} \
+  --preferred-challenges http-01 \
+  -w /var/www/${COMMON_NAME} \
+  --fullchain-path ${FULLCHAIN_PATH} \
+  --chain-path ${CHAIN_PATH} \
+  --cert-path ${CERT_PATH} >> ${LOG_PATH} 2>&1
+
+if [ ! -f ${FULLCHAIN_PATH} ]; then
+  echo "Error: Failed to create fullchain file!" >&2
+fi
+
+if [ ! -f ${CHAIN_PATH} ]; then
+  echo "Error: Failed to create chain file!" >&2
+fi
+
+if [ ! -f ${CERT_PATH} ]; then
+  echo "Error: Failed to create cert file!" >&2
+fi
+
+if [ ! -f ${FULLCHAIN_PATH} -o ! -f ${CHAIN_PATH} -o ! -f ${CERT_PATH} ]; then
+  echo "Error: Failed to generate required files!"
+  if [ -f ${LOG_PATH} ]; then
+    tail ${LOG_PATH} # just show the last few lines
+  fi
+  exit 1;
+fi

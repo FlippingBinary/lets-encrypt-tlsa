@@ -1,0 +1,109 @@
+#!/bin/bash
+##
+## le-install
+##
+## This script installs the latest certificate into the live directory.
+##
+## Source: https://flippingbinary.com
+## 
+## Copyright 2017 Jonathan Musselwhite
+## 
+## Permission is hereby granted, free of charge, to any person obtaining a copy 
+## of this software and associated documentation files (the "Software"), to 
+## deal in the Software without restriction, including without limitation the 
+## rights to use, copy, modify, merge, publish, distribute, sublicense, and/or 
+## sell copies of the Software, and to permit persons to whom the Software is 
+## furnished to do so, subject to the following conditions:
+## 
+## The above copyright notice and this permission notice shall be included in 
+## all copies or substantial portions of the Software.
+## 
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+## IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+## FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+## AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+## LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+## OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+## THE SOFTWARE.
+##
+###
+
+###### CHECK SETTINGS ######
+MAIN_DIR=/etc/ssl/letsencrypt
+###### CHECK SETTINGS ######
+
+if [ "$#" -lt 1 ]
+then
+  echo "Usage: $0 domain" >&2
+  echo "       domain MUST be the first listed domain" >&2
+  echo "       additional arguments (such as alternate domains) are ignored" >&2
+  exit 1
+fi
+
+COMMON_NAME="$1"
+ARCHIVE_DIR=${MAIN_DIR}/archive/${COMMON_NAME}
+LIVE_DIR=${MAIN_DIR}/live/${COMMON_NAME}
+PRIVKEY_DIR=${MAIN_DIR}/keys/${COMMON_NAME}
+
+# Make sure the directory exists to prevent simple problems
+mkdir -p ${LIVE_DIR}
+
+# Install cert file
+
+unset -v latest
+for file in "${ARCHIVE_DIR}"/cert-*.pem; do
+  [[ $file -nt $latest ]] && latest=$file
+done
+
+if [ ! -f "${latest}" ]
+then
+  echo "Error: cert file does not exist!"
+  exit 1
+fi
+
+ln -sf ${latest} ${LIVE_DIR}/cert.pem
+
+# Install fullchain file
+
+unset -v latest
+for file in "${ARCHIVE_DIR}"/fullchain-*.pem; do
+  [[ $file -nt $latest ]] && latest=$file
+done
+
+if [ ! -f "${latest}" ]
+then
+  echo "Error: fullchain file does not exist!"
+  exit 1
+fi
+
+ln -sf ${latest} ${LIVE_DIR}/fullchain.pem
+
+# Install chain file
+
+unset -v latest
+for file in "${ARCHIVE_DIR}"/chain-*.pem; do
+  [[ $file -nt $latest ]] && latest=$file
+done
+
+if [ ! -f "${latest}" ]
+then
+  echo "Error: chain file does not exist!"
+  exit 1
+fi
+
+ln -sf ${latest} ${LIVE_DIR}/chain.pem
+
+# Install private key
+
+unset -v latest
+for file in "${PRIVKEY_DIR}"/privkey-*.pem; do
+  [[ $file -nt $latest ]] && latest=$file
+done
+
+if [ ! -f "${latest}" ]
+then
+  echo "Error: privkey does not exist!"
+  exit 1
+fi
+
+ln -sf ${latest} ${LIVE_DIR}/privkey.pem
