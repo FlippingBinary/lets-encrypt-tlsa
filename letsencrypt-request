@@ -1,6 +1,6 @@
 #!/bin/bash
 ##
-## le-request
+## letsencrypt-request
 ##
 ## This script requests a signature from Let's Encrypt CA with a reusable
 ## keypair, overriding the default behavior of certbot.

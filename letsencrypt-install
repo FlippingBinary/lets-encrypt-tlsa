@@ -1,6 +1,6 @@
 #!/bin/bash
 ##
-## le-install
+## letsencrypt-install
 ##
 ## This script installs the latest certificate into the live directory.
 ##

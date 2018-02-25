@@ -1,6 +1,6 @@
 #!/bin/bash
 ##
-## le-hash
+## letsencrypt-hash
 ##
 ## This script hashes a TLS certificate and produces a valid TLSA record.
 ##
@@ -65,5 +65,5 @@ HASH=$(openssl x509 -in ${latest} -noout -pubkey |
 # Print out an example TLSA record for each listed domain
 for x in "$@"
 do
-  echo "  _443._tcp.${x}. IN TLSA 3 1 1 ${HASH}
+  echo "  _443._tcp.${x}. IN TLSA 3 1 1 ${HASH}"
 done

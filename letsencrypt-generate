@@ -1,6 +1,6 @@
 #!/bin/bash
 ##
-## le-generate
+## letsencrypt-generate
 ##
 ## This script generates a new keypair and certificate signing request
 ## for Let's Encrypt.
@@ -44,7 +44,7 @@ DOMAINS="DNS:$1"
 COMMON_NAME="$1"
 CSR_DIR=${MAIN_DIR}/csr/${COMMON_NAME}
 PRIVKEY_DIR=${MAIN_DIR}/keys/${COMMON_NAME}
-CNF_PATH="${MAIN_DIR}/openssl.cnf"
+#CNF_PATH="${MAIN_DIR}/openssl.cnf"
 CSR_PATH="${CSR_DIR}/csr-${DATE}.der"
 PRIVKEY_PATH="${PRIVKEY_DIR}/privkey-${DATE}.pem"
 
@@ -56,11 +56,11 @@ do
 done
 
 # OpenSSL needs a configuration file, which must exist.
-if [ ! -f "${CNF_PATH}" ]
-then
-  echo "${CNF_PATH} does not exist!"
-  exit 1
-fi
+#if [ ! -f "${CNF_PATH}" ]
+#then
+#  echo "${CNF_PATH} does not exist!"
+#  exit 1
+#fi
 
 # Create a few directories to prevent simple errors
 mkdir -p ${CSR_DIR}
@@ -69,7 +69,7 @@ chmod 700 ${PRIVKEY_DIR}
 
 # Generate the actual keypair using OpenSSL
 COMMON_NAME="${COMMON_NAME}" SAN="${DOMAINS}" openssl req \
-  -config "${CNF_PATH}" \
+  -config <(printf "[req]\ndistinguished_name=req_dn\n[req_dn]\ncommonName=${COMMON_NAME}\n[san]\nsubjectAltName=${DOMAINS}") \
   -new -nodes -subj '/' -reqexts san \
   -out "${CSR_PATH}" \
   -keyout "${PRIVKEY_PATH}" \
