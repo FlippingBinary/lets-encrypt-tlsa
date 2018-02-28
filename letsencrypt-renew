@@ -34,6 +34,16 @@ MAIN_DIR=/etc/ssl/letsencrypt
 ###### CHECK SETTINGS ######
 [ -f /etc/default/letsencrypt-tlsa ] && . /etc/default/letsencrypt-tlsa
 
+# Attempt to renew every certificate in live directory which expires in less
+# than three weeks.
 for file in "${MAIN_DIR}/live"/*; do
+  if ! openssl x509 -checkend 1814400 -noout -in ${file}/cert.pem
+  then
   /usr/local/sbin/letsencrypt-request $(basename $file)
+    /usr/local/sbin/letsencrypt-install $(basename $file)
+  fi
+  if ! openssl x509 -checkend 1814400 -noout -in ${file}/cert.pem
+  then
+    echo "Certificate renewal failed! Check status of $(basename $file)!"
+  fi
 done
