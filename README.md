@@ -1,6 +1,6 @@
 # lets-encrypt-tlsa
 
-Learn more about this script at the [Flipping Binary website](https://flippingbinary.com)
+Read the [article](https://flippingbinary.com/2018/02/26/lets-encrypt-with-tlsa-dane/) about this script on the [Flipping Binary website](https://flippingbinary.com).
 
 ## Installation
 
