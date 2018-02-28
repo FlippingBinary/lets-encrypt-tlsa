@@ -69,6 +69,7 @@ fi
 
 # Make sure the directory exists to prevent simple problems
 mkdir -p ${ARCHIVE_DIR}
+mkdir -p ${LOG_DIR}
 
 # Finally request the actual signed certificate
 certbot certonly \
