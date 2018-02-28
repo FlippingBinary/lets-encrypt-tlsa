@@ -39,7 +39,7 @@ MAIN_DIR=/etc/ssl/letsencrypt
 for file in "${MAIN_DIR}/live"/*; do
   if ! openssl x509 -checkend 1814400 -noout -in ${file}/cert.pem
   then
-  /usr/local/sbin/letsencrypt-request $(basename $file)
+    /usr/local/sbin/letsencrypt-request $(basename $file)
     /usr/local/sbin/letsencrypt-install $(basename $file)
   fi
   if ! openssl x509 -checkend 1814400 -noout -in ${file}/cert.pem
