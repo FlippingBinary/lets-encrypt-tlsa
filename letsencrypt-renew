@@ -32,6 +32,7 @@
 ###### CHECK SETTINGS ######
 MAIN_DIR=/etc/ssl/letsencrypt
 ###### CHECK SETTINGS ######
+[ -f /etc/default/letsencrypt-tlsa ] && . /etc/default/letsencrypt-tlsa
 
 for file in "${MAIN_DIR}/live"/*; do
   /usr/local/sbin/letsencrypt-request $(basename $file)
