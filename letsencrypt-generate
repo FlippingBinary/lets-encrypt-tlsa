@@ -61,7 +61,7 @@ mkdir -p ${PRIVKEY_DIR}
 chmod 700 ${PRIVKEY_DIR}
 
 # Generate the actual keypair using OpenSSL
-COMMON_NAME="${COMMON_NAME}" SAN="${DOMAINS}" openssl req \
+openssl req \
   -config <(printf "[req]\ndistinguished_name=req_dn\n[req_dn]\ncommonName=${COMMON_NAME}\n[san]\nsubjectAltName=${DOMAINS}") \
   -new -nodes -subj '/' -reqexts san \
   -out "${CSR_PATH}" \
