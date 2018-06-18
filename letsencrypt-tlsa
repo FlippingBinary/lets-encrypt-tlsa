@@ -33,4 +33,7 @@
 EMAIL=UnconfiguredScript@example.com
 MAIN_DIR=/etc/ssl/letsencrypt
 LOG_DIR=/var/log/letsencrypt
+RELOAD_APACHE=true
+RELOAD_NGINX=false
+RELOAD_DOVECOT=true
 ###### CHECK SETTINGS ######
