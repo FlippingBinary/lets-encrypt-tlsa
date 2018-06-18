@@ -108,3 +108,17 @@ then
 fi
 
 ln -sf ${latest} ${LIVE_DIR}/privkey.pem
+
+# Reload the services which use certificates
+
+if [ "$RELOAD_APACHE" = true ] ; then
+  /usr/sbin/service apache2 reload
+fi
+
+if [ "$RELOAD_NGINX" = true ] ; then
+  /usr/sbin/service nginx reload
+fi
+
+if [ "$RELOAD_DOVECOT" = true ] ; then
+  /usr/sbin/service/dovecot reload
+fi
