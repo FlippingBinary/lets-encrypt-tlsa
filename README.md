@@ -2,6 +2,10 @@
 
 Read the [article](https://flippingbinary.com/2018/02/26/lets-encrypt-with-tlsa-dane/) about this script on the [Flipping Binary website](https://flippingbinary.com).
 
+## Contributors wanted
+
+I've noticed an uptick in interest recently, but my time is devoted to other projects at the moment. If you make improvements that you want to share, please submit a pull request. I will probably approve it as long as it doesn't break anything and provides some sort of improvement.
+
 ## Installation
 
 Modify these steps and the scripts as necessary for your distribution. The steps have been tested only on Ubuntu 16.04 servers.
